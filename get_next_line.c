@@ -1,61 +1,103 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>
-#define BUFFER_SIZE 4
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lnyamets <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/09/01 22:37:56 by lnyamets          #+#    #+#             */
+/*   Updated: 2021/09/08 03:09:41 by lnyamets         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int ft_verify(char *str)
+#include "get_next_line.h" 
+
+void	netoyer_save(char **pp, int i)
 {
-	int i;
+	char	*new_str;
+	char	*bsave;
+	int		j;
 
-	i = 0;
-	if (!str)
-		return (0);
-	while (*str)
+	bsave = *pp;
+	if (!bsave[i])
 	{
-		if (*str == '\n')
-			return (1);
-		str++; //Faire attention sur cette partie car
-	   		  //l adresse peut changer vue aue ce n est pas une copie par value
+		free(bsave);
+		*pp = NULL;
+		return ;
 	}
-	return (0);
+	new_str = (char *)malloc(sizeof(char *) * (ft_strlen(bsave) - i + 1));
+	if (!new_str)
+		return ;
+	j = i + 1;
+	i = 0;
+	while (bsave[j])
+		new_str[i++] = bsave[j++];
+	new_str[i] = '\0';
+	free(bsave);
+	*pp = new_str;
+	if (!ft_strlen(*pp))
+		*pp = NULL;
+	return ;
 }
 
-char *get_next_line(int fd)
+char	*return_line(char **pp)
 {
-	char	*buf;	
-	int		ret;
-	static char	*save;
-	char *output;
-		
-	tmp = NULL;
-	buf = NULL;
-	ret = 1;
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return NULL;
-	if (buf = malloc(sizeof(char * ) * BUFFER_SIZE + 1) == NULL)
-		return NULL;
-	if (!ft_verify(save) && ret != 0)
+	char	*line;
+	char	*bac;
+	int		i;
+	int		j;
+
+	bac = *pp;
+	if (!bac)
+		return (NULL);
+	i = 0;
+	while (bac[i] && bac[i] != '\n')
+		i++;
+	if (bac[i] == '\n')
+		line = (char *)malloc(sizeof(char) * (i + 2));
+	else
+		line = (char *)malloc(sizeof(char) * (i + 1));
+	if (!line)
+		return (NULL);
+	j = -1;
+	while (++j <= i)
+		line[j] = bac[j];
+	if (bac[j - 1] == '\n')
+		line[j] = '\0';
+	netoyer_save(pp, i);
+	return (line);
+}
+
+void	init_local_var(int *p_ret, char **new_line)
+{
+	*p_ret = 1;
+	*new_line = NULL;
+}
+
+char	*get_next_line(int fd)
+{
+	char		*buf;	
+	int			ret;
+	static char	*save = NULL;
+	char		*new_line;
+
+	init_local_var(&ret, &new_line);
+	buf = (char *)malloc(sizeof(char *) * (BUFFER_SIZE + 1));
+	if (!buf || fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	while (!ft_verify(save) && ret != 0)
 	{
-		if ((ret = read(fd, buf, BUFFER_SIZE)) == -1)
+		ret = read(fd, buf, BUFFER_SIZE);
+		if ((ret == -1 ) || (!ret && !save))
 		{
 			free(buf);
 			return (NULL);
 		}
 		buf[ret] = '\0';
-		save = my_join(save, buf);
-		free(buf);
+		if (ret != 0)
+			save = my_join(save, buf);
 	}
-	return (save);
-
-}
-
-int main()
-{
-	int fd;
-	fd = open(0, O_RDONLY);
-	
-   if (fd == -1)
-	   return 1;
-   return (get_next_line(fd));
-
+	free(buf);
+	new_line = return_line(&save);
+	return (new_line);
 }
