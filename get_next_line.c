@@ -6,7 +6,7 @@
 /*   By: lnyamets <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 22:37:56 by lnyamets          #+#    #+#             */
-/*   Updated: 2021/09/08 03:09:41 by lnyamets         ###   ########.fr       */
+/*   Updated: 2021/09/09 00:41:00 by lnyamets         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,28 +15,29 @@
 void	netoyer_save(char **pp, int i)
 {
 	char	*new_str;
-	char	*bsave;
 	int		j;
 
-	bsave = *pp;
-	if (!bsave[i])
+	if (!(*pp)[i])
 	{
-		free(bsave);
+		free(*pp);
 		*pp = NULL;
 		return ;
 	}
-	new_str = (char *)malloc(sizeof(char *) * (ft_strlen(bsave) - i + 1));
+	new_str = (char *)malloc(sizeof(char *) * (ft_strlen((*pp)) - i + 1));
 	if (!new_str)
 		return ;
 	j = i + 1;
 	i = 0;
-	while (bsave[j])
-		new_str[i++] = bsave[j++];
+	while ((*pp)[j])
+		new_str[i++] = (*pp)[j++];
 	new_str[i] = '\0';
-	free(bsave);
+	free((*pp));
 	*pp = new_str;
 	if (!ft_strlen(*pp))
+	{
+		free(*pp);
 		*pp = NULL;
+	}
 	return ;
 }
 
